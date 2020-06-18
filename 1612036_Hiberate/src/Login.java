@@ -103,6 +103,20 @@ public class Login extends JFrame {
 					ResultSet rs = stmt.executeQuery(sql);
 					if(rs.next())
 					{
+						Boolean isStudent  = rs.getBoolean("isStudent");
+						if(!isStudent)
+						{
+							Dashboard Dashboard = new Dashboard();
+							Dashboard.setVisible(true);
+							Login.this.dispose();
+						}
+						else
+						{
+							
+							
+						}
+						
+						
 					}
 					else
 					{
