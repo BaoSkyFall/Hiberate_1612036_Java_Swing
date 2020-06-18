@@ -8,6 +8,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import java.awt.Font;
+import java.awt.Image;
+
 import javax.swing.SwingConstants;
 import javax.swing.JTextField;
 import java.awt.Color;
@@ -15,6 +17,7 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.border.MatteBorder;
 import javax.swing.JPasswordField;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -25,6 +28,8 @@ public class Login extends JFrame {
 	private JPanel contentPane;
 	private JTextField txt_username;
 	private JPasswordField txt_password;
+	private Image img_logo = new ImageIcon("img/Meeting-04.png").getImage().getScaledInstance(90,90,Image.SCALE_SMOOTH);
+	private Image img_hcmus = new ImageIcon("img/hcmus-cover.png").getImage().getScaledInstance(350,150,Image.SCALE_SMOOTH);
 
 	/**
 	 * Launch the application.
@@ -47,7 +52,7 @@ public class Login extends JFrame {
 	 */
 	public Login() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 573, 503);
+		setBounds(100, 100, 573, 555);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(null);
@@ -62,7 +67,7 @@ public class Login extends JFrame {
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new MatteBorder(1, 1, 1, 1, (Color) new Color(0, 0, 0)));
-		panel.setBounds(63, 129, 448, 248);
+		panel.setBounds(63, 153, 448, 303);
 		panel.setLayout(null);
 		contentPane.add(panel);
 		
@@ -104,10 +109,14 @@ public class Login extends JFrame {
 					if(rs.next())
 					{
 						Boolean isStudent  = rs.getBoolean("isStudent");
+						String name = rs.getString("name");
 						if(!isStudent)
 						{
 							Dashboard Dashboard = new Dashboard();
 							Dashboard.setVisible(true);
+							System.out.println(name);
+
+							Dashboard.setNameUser(name);
 							Login.this.dispose();
 						}
 						else
@@ -137,11 +146,20 @@ public class Login extends JFrame {
 		btnNewButton.setBounds(133, 140, 175, 51);
 		panel.add(btnNewButton);
 		
-		JLabel lblLogin = new JLabel("LOGIN");
+		JLabel lblLogo = new JLabel("");
+		lblLogo.setHorizontalAlignment(SwingConstants.CENTER);
+		lblLogo.setForeground(Color.BLACK);
+		lblLogo.setFont(new Font("UTM Androgyne", Font.PLAIN, 26));
+		lblLogo.setBounds(0, 219, 448, 60);
+		lblLogo.setIcon(new ImageIcon(img_hcmus));
+		panel.add(lblLogo);
+		
+		JLabel lblLogin = new JLabel("");
 		lblLogin.setHorizontalAlignment(SwingConstants.CENTER);
 		lblLogin.setForeground(Color.BLACK);
 		lblLogin.setFont(new Font("UTM Androgyne", Font.PLAIN, 26));
-		lblLogin.setBounds(10, 82, 537, 36);
+		lblLogin.setBounds(63, 58, 448, 90);
+		lblLogin.setIcon(new ImageIcon(img_logo));
 		contentPane.add(lblLogin);
 	}
 }
