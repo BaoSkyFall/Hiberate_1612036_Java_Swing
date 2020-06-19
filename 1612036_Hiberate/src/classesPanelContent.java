@@ -3,12 +3,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 import java.sql.Array;
+import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -38,6 +41,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
 
 public class classesPanelContent extends JPanel {
 	private JTable tableList;
@@ -67,7 +72,7 @@ public class classesPanelContent extends JPanel {
 		
 		JComboBox comboBoxChooseClass = new JComboBox();
 		comboBoxChooseClass.setBackground(new Color(255, 255, 255));
-		comboBoxChooseClass.setFont(new Font("UTM Androgyne", Font.PLAIN, 16));
+		comboBoxChooseClass.setFont(new Font("Arial Black", Font.PLAIN, 16));
 		comboBoxChooseClass.setBounds(142, 16, 198, 22);
 		comboBoxChooseClass.addActionListener(new ActionListener() {
 
@@ -81,7 +86,7 @@ public class classesPanelContent extends JPanel {
 					System.out.println(o);
 					try {
 						Class.forName("com.mysql.jdbc.Driver");
-						Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/hiberate?characterEncoding=latin1","root","root");
+						Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/hiberate?characterEncoding=UTF-8","root","root");
 						Statement stmt=con.createStatement();
 						
 						showDataTable(o.toString(), stmt);
@@ -179,12 +184,12 @@ public class classesPanelContent extends JPanel {
 		lblNewLabel_1_2.setBounds(0, 49, 123, 23);
 		panel.add(lblNewLabel_1_2);
 		
-		JButton btnImortDataFrom = new JButton("Imort data from file");
-		btnImortDataFrom.addActionListener(new ActionListener() {
+		JButton btnImportDataFrom = new JButton("Import data from file");
+		btnImportDataFrom.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
-		btnImortDataFrom.addMouseListener(new MouseAdapter() {
+		btnImportDataFrom.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				JFileChooser fileChooser = new JFileChooser();
@@ -196,13 +201,25 @@ public class classesPanelContent extends JPanel {
 				{
 					File fi = fileChooser.getSelectedFile();
 					try {
-						
+				        List < User > list = new ArrayList < > ();
 						BufferedReader br = new BufferedReader(new InputStreamReader( new FileInputStream(fi.getPath()), "UTF-8"));
-						String className = br.readLine().trim().replace(",", ""); ;
+						String className = br.readLine().trim().replace(",", "").toString(); ;
 						
 						String columns = br.readLine().trim();
 						System.out.println(columns);
-
+						Object [] lines = br.lines().toArray();
+						for(int i=0;i<lines.length;i++)
+						{
+							String line = lines[i].toString().trim();
+							String[] dataRow = line.split(",");
+							list.add(new User(dataRow[1],dataRow[1],dataRow[2],dataRow[4],dataRow[3].toLowerCase() =="nam"?true:false,dataRow[1],className));
+							
+						}
+						 String INSERT_USERS_SQL = "INSERT INTO users (username,password,name,indentity_number,gender,indentity_student,id_class)\r\n" + 
+						 		"SELECT * FROM (SELECT ? as username ,? as password,?,?,?,? as indentity_number,(SELECT(id_class) as id_class from classes where name_class=?)) as tmp\r\n" + 
+						 		"WHERE NOT EXISTS (\r\n" + 
+						 		"    SELECT username FROM users WHERE username = ?\r\n" + 
+						 		") LIMIT 1;";
 						try {
 							Class.forName("com.mysql.jdbc.Driver");
 							Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/hiberate?characterEncoding=UTF-8","root","root");
@@ -213,13 +230,39 @@ public class classesPanelContent extends JPanel {
 							pstmt.setString(2, className);
 							int rs = pstmt.executeUpdate();
 							System.out.println(rs);
-							
 							if(rs!=0)
 							{
 								JOptionPane.showMessageDialog(null,"Add new Class: " + className + " sucessfull");
-								
+								 try (Connection connection = DriverManager
+								            .getConnection("jdbc:mysql://localhost:3306/hiberate?characterEncoding=UTF-8", "root", "root");
+								            // Step 2:Create a statement using connection object
+								            PreparedStatement preparedStatement = (PreparedStatement) connection.prepareStatement(INSERT_USERS_SQL)) {
+								            connection.setAutoCommit(false);
+								            for (Iterator < User > iterator = list.iterator(); iterator.hasNext();) {
+								                User user = (User) iterator.next();
+								                preparedStatement.setString(1, user.getUsername());
+								                preparedStatement.setString(2, user.getUsername());
+								                preparedStatement.setString(3, user.getName());
+								                preparedStatement.setString(4, user.getIndentity_number());
+								                preparedStatement.setBoolean(5, user.getGender());
+								                preparedStatement.setString(6, user.getUsername());
+								                preparedStatement.setString(7, user.getname_class());
+								                preparedStatement.setString(8, user.getUsername());
+								                preparedStatement.addBatch();
+								            }
+											System.out.println(preparedStatement);							       
+								            int[] updateCounts = preparedStatement.executeBatch();
+								            System.out.println(Arrays.toString(updateCounts));
+								            connection.commit();
+								            connection.setAutoCommit(true);
+								        } catch (BatchUpdateException batchUpdateException) {
+								        } catch (SQLException e1) {
+								        }
+									comboBoxChooseClass.addItem(className);
 
 							}
+								
+							
 							else
 							{
 								JOptionPane.showMessageDialog(null,"Can't add new Class: " + className + ". Because it existed");
@@ -244,18 +287,20 @@ public class classesPanelContent extends JPanel {
 					}
 					
 				}
+
+					}
 				
 
 		
-			}
+		
 		});
-		btnImortDataFrom.setBounds(337, 25, 159, 23);
-		add(btnImortDataFrom);
+		btnImportDataFrom.setBounds(337, 25, 159, 23);
+		add(btnImportDataFrom);
 	
 		
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
-			Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/hiberate?characterEncoding=latin1","root","root");
+			Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/hiberate?characterEncoding=UTF-8","root","root");
 			Statement stmt=con.createStatement();
 			sqlClasses = "select * from classes;";
 			System.out.println(sqlClasses);
@@ -265,7 +310,9 @@ public class classesPanelContent extends JPanel {
 			{
 				
 				List<String> list = new ArrayList<>();
-				comboBoxChooseClass.addItem(rs.getString("name_class"));
+				
+				String item = new String(rs.getString("name_class"));
+				comboBoxChooseClass.addItem(item);
 				list.add(rs.getString("name_class"));
 				while(rs.next()){
 				
