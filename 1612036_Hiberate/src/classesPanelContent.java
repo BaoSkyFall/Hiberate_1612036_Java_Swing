@@ -1,9 +1,12 @@
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.List;
 import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
@@ -13,26 +16,45 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+
+import com.mysql.jdbc.PreparedStatement;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JTable;
 import javax.swing.JButton;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 public class classesPanelContent extends JPanel {
 	private JTable tableList;
+	private JScrollPane scroll;
 
 	/**
 	 * Create the panel.
 	 */
+	public String sqlClasses = "";
+	public String sqlStudents = "";
+	public String classChoosen= "";
 	public classesPanelContent() {
+	
 		setSize(521,437);
 		setLayout(null);
 		JLabel lblNewLabel = new JLabel("CLASSES CONTENT");
-		lblNewLabel.setBounds(142, 14, 230, 34);
+		lblNewLabel.setBounds(125, 14, 230, 34);
 		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNewLabel.setFont(new Font("UTM Androgyne", Font.PLAIN, 17));
 		add(lblNewLabel);
@@ -47,6 +69,40 @@ public class classesPanelContent extends JPanel {
 		comboBoxChooseClass.setBackground(new Color(255, 255, 255));
 		comboBoxChooseClass.setFont(new Font("UTM Androgyne", Font.PLAIN, 16));
 		comboBoxChooseClass.setBounds(142, 16, 198, 22);
+		comboBoxChooseClass.addActionListener(new ActionListener() {
+
+	      
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				 JComboBox comboBox = (JComboBox) e.getSource();
+		          Object o = comboBox.getSelectedItem();
+					System.out.println(o);
+					try {
+						Class.forName("com.mysql.jdbc.Driver");
+						Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/hiberate?characterEncoding=latin1","root","root");
+						Statement stmt=con.createStatement();
+						
+						showDataTable(o.toString(), stmt);
+
+								
+								
+							
+					} catch (ClassNotFoundException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+						
+						
+			}	
+		          
+				
+		});
 		panel.add(comboBoxChooseClass);
 		
 		JLabel lblNewLabel_1 = new JLabel("Choose class :");
@@ -60,30 +116,142 @@ public class classesPanelContent extends JPanel {
 		lblNewLabel_1_1.setFont(new Font("UTM Androgyne", Font.PLAIN, 16));
 		lblNewLabel_1_1.setBounds(27, 79, 143, 23);
 		panel.add(lblNewLabel_1_1);
-		
+
 		tableList = new JTable();
 		tableList.setUpdateSelectionOnSort(false);
 		tableList.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		tableList.setModel(new DefaultTableModel(
-			new Object[][] {
-			},
-			new String[] {
-				"MSSV", "NAME", "GENDER", "CMND"
-			}
-		));
-		tableList.setBounds(27, 113, 441, 242);
-		panel.add(tableList);
-//		 JScrollPane js=new JScrollPane(tableList);
-//	     js.setVisible(true);
-//	    add(js);
+		tableList.setBounds(27, 135, 441, 220);
+		scroll = new JScrollPane(tableList);
+		scroll.setFont(new Font("UTM Androgyne", Font.PLAIN, 18));
+		scroll.setBounds(27, 135, 441, 220);
+		panel.add(scroll);
 
+		
 
 		JButton btnNewButton = new JButton("Add Student to Class");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnNewButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				String mssv = JOptionPane.showInputDialog(null,"MSSV");
+				try {
+					Class.forName("com.mysql.jdbc.Driver");
+					Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/hiberate?characterEncoding=latin1","root","root");
+					Statement stmt=con.createStatement();
+					String sqlInsert ="update users set id_class =(select id_class from classes where name_class=?) where indentity_student=?;";
+					PreparedStatement pstmt = (PreparedStatement) con.prepareStatement(sqlInsert);
+					pstmt.setString(1, classChoosen);
+					pstmt.setString(2, mssv);
+					int rs = pstmt.executeUpdate();
+					System.out.println(rs);
+					showDataTable(classChoosen, stmt);
+					if(rs!=0)
+					{
+						JOptionPane.showMessageDialog(null,"Add student into class " + classChoosen + " sucessfull");
+
+					}
+
+					
+					
+				} catch (Exception e2) {
+					System.out.println(e2.getMessage());
+					JOptionPane.showMessageDialog(null,e2.getMessage());
+
+					// TODO: handle exception
+				}
+			}
+		});
 		btnNewButton.setBounds(309, 79, 159, 23);
 		panel.add(btnNewButton);
-		String sqlClasses = "";
-		String sqlStudents = "";
-		DefaultTableModel model = new DefaultTableModel();
+		
+		JComboBox comboBoxChooseClass_1 = new JComboBox();
+		comboBoxChooseClass_1.setFont(new Font("UTM Androgyne", Font.PLAIN, 16));
+		comboBoxChooseClass_1.setBackground(Color.WHITE);
+		comboBoxChooseClass_1.setBounds(142, 50, 198, 22);
+		panel.add(comboBoxChooseClass_1);
+		
+		JLabel lblNewLabel_1_2 = new JLabel("Choose subject :");
+		lblNewLabel_1_2.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblNewLabel_1_2.setFont(new Font("UTM Androgyne", Font.PLAIN, 16));
+		lblNewLabel_1_2.setBounds(0, 49, 123, 23);
+		panel.add(lblNewLabel_1_2);
+		
+		JButton btnImortDataFrom = new JButton("Imort data from file");
+		btnImortDataFrom.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnImortDataFrom.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				JFileChooser fileChooser = new JFileChooser();
+//				FileNameExtensionFilter filterFileChooser = new FileNameExtensionFilter(".csv","xls");
+//				fileChooser.setFileFilter(filterFileChooser);
+				fileChooser.setMultiSelectionEnabled(false);
+				int  x= fileChooser.showDialog(panel, "Chon File");
+				if(x==JFileChooser.APPROVE_OPTION)
+				{
+					File fi = fileChooser.getSelectedFile();
+					try {
+						
+						BufferedReader br = new BufferedReader(new InputStreamReader( new FileInputStream(fi.getPath()), "UTF-8"));
+						String className = br.readLine().trim().replace(",", ""); ;
+						
+						String columns = br.readLine().trim();
+						System.out.println(columns);
+
+						try {
+							Class.forName("com.mysql.jdbc.Driver");
+							Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/hiberate?characterEncoding=UTF-8","root","root");
+							Statement stmt=con.createStatement();
+							String sqlInsert ="INSERT INTO classes (name_class) SELECT * FROM (SELECT ?) AS tmp WHERE NOT EXISTS (SELECT name_class FROM classes WHERE name_class = ?) LIMIT 1;";
+							PreparedStatement pstmt = (PreparedStatement) con.prepareStatement(sqlInsert);
+							pstmt.setString(1, className);
+							pstmt.setString(2, className);
+							int rs = pstmt.executeUpdate();
+							System.out.println(rs);
+							
+							if(rs!=0)
+							{
+								JOptionPane.showMessageDialog(null,"Add new Class: " + className + " sucessfull");
+								
+
+							}
+							else
+							{
+								JOptionPane.showMessageDialog(null,"Can't add new Class: " + className + ". Because it existed");
+							}
+
+							
+							
+						} catch (Exception e2) {
+							System.out.println(e2.getMessage());
+							JOptionPane.showMessageDialog(null,e2.getMessage());
+
+							// TODO: handle exception
+						}
+						
+						
+					} catch (FileNotFoundException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+				}
+				
+
+		
+			}
+		});
+		btnImortDataFrom.setBounds(337, 25, 159, 23);
+		add(btnImortDataFrom);
+	
 		
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
@@ -97,48 +265,66 @@ public class classesPanelContent extends JPanel {
 			{
 				
 				List<String> list = new ArrayList<>();
+				comboBoxChooseClass.addItem(rs.getString("name_class"));
+				list.add(rs.getString("name_class"));
 				while(rs.next()){
+				
 					comboBoxChooseClass.addItem(rs.getString("name_class"));
 					list.add(rs.getString("name_class"));
 					}
-				sqlStudents= "select u.*,c.name_class from users as u,classes as c where u.id_class = c.id_class and c.name_class='"+ list.get(0) +"'";
-				ResultSet resultStudent = stmt.executeQuery(sqlStudents);
-				System.out.println(sqlStudents);
-				model.addColumn("MSSV");
-				model.addColumn("Name");
-				model.addColumn("Gender");
-				model.addColumn("CMND");
-				if(resultStudent.next())
-				{
+				showDataTable(list.get(0), stmt);
 			
-					while(resultStudent.next())
-					{
-						model.addRow(new Object[] {
-							resultStudent.getString("indentity_student"),
-							resultStudent.getString("name"),
-							resultStudent.getBoolean("gender")? "Male": "Female",
-							resultStudent.getString("indentity_number"),
-							
-						});
-					}
-					System.out.println(model.getColumnCount());
-					tableList.setModel(model);
-				
-
-
-					
-				}
-				
-				
-			}
-			else
-			{
-				JOptionPane.showMessageDialog(null,"Get Data Fail");
-
-			}
-			
-	}catch(Exception e1) {
+	}
+		}catch(Exception e1) {
 		System.out.println(e1);
 	}
+	}
+	
+	public void showDataTable(String className,Statement stmt) throws SQLException
+	{
+		sqlStudents= "select u.*,c.name_class from users as u,classes as c where u.id_class = c.id_class and c.name_class='"+ className +"'";
+		ResultSet resultStudent = stmt.executeQuery(sqlStudents);
+		System.out.println(sqlStudents);
+		classChoosen= className;
+		if(resultStudent.next())
+		{
+			 DefaultTableModel model = new DefaultTableModel();
+			model.addColumn("MSSV");
+			model.addColumn("Name");
+			model.addColumn("Gender");
+			model.addColumn("CMND");
+			model.addRow(new Object[] {
+					resultStudent.getString("indentity_student"),
+					resultStudent.getString("name"),
+					resultStudent.getBoolean("gender")? "Male": "Female",
+					resultStudent.getString("indentity_number"),
+					
+				});
+			while(resultStudent.next())
+			{
+				model.addRow(new Object[] {
+					resultStudent.getString("indentity_student"),
+					resultStudent.getString("name"),
+					resultStudent.getBoolean("gender")? "Male": "Female",
+					resultStudent.getString("indentity_number"),
+					
+				});
+			}
+			System.out.println(model.getColumnCount());
+			tableList.setModel(model);
+			tableList.getColumnModel().getColumn(1).setPreferredWidth(180);
+
+
+			
+		}
+		
+		
+	
+	else
+	{
+		JOptionPane.showMessageDialog(null,"Get Data Fail");
+
+	}
+		
 	}
 }

@@ -319,6 +319,4 @@ public class Dashboard extends JFrame {
 	public void setNameUser(String name) {
 		lblUser.setText(name);
 	}
-	
-	
 }
