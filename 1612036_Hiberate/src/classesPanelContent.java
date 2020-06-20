@@ -25,6 +25,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
 import com.mysql.jdbc.PreparedStatement;
+import com.sun.jdi.connect.Connector.SelectedArgument;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -58,9 +59,11 @@ public class classesPanelContent extends JPanel {
 	public String sqlStudents = "";
 	public String classChoosen= "";
 	public String codeSubjectChoosen="";
+	public String mssvChoosen="";
+	public int indexChoosen=-1;
 	public classesPanelContent() {
 	
-		setSize(521,437);
+		setSize(900,600);
 		setLayout(null);
 		JLabel lblNewLabel = new JLabel("CLASSES CONTENT");
 		lblNewLabel.setBounds(125, 14, 230, 34);
@@ -69,11 +72,16 @@ public class classesPanelContent extends JPanel {
 		add(lblNewLabel);
 		
 		JPanel panel = new JPanel();
-		panel.setBounds(20, 59, 491, 366);
+		panel.setBounds(20, 59, 870, 530);
 		panel.setBorder(new LineBorder(new Color(0, 0, 0)));
 		add(panel);
 		panel.setLayout(null);
 		JComboBox comboBoxSubject = new JComboBox();
+		JLabel lblStudentDisplay = new JLabel("Student :");
+		lblStudentDisplay.setHorizontalAlignment(SwingConstants.LEFT);
+		lblStudentDisplay.setFont(new Font("UTM Androgyne", Font.PLAIN, 16));
+		lblStudentDisplay.setBounds(27, 296, 242, 23);
+		panel.add(lblStudentDisplay);
 		comboBoxSubject.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -81,7 +89,7 @@ public class classesPanelContent extends JPanel {
 				 JComboBox comboBox = (JComboBox) e.getSource();
 		          Object o = comboBox.getSelectedItem();
 					System.out.println(o);
-				
+					codeSubjectChoosen= o.toString();
 					
 					try {
 						Class.forName("com.mysql.jdbc.Driver");
@@ -95,7 +103,7 @@ public class classesPanelContent extends JPanel {
 						else
 						{
 							sqlSubjects = "select u.* from listsubjectclass as lsc, users as u,subjects as s where s.code_subject = lsc.code_subject \r\n" + 
-									"and u.id_user = lsc.id_user and lsc.code_subject = '"+ o.toString() + "';";
+									"and u.id_user = lsc.id_user and lsc.code_subject = '"+ codeSubjectChoosen + "';";
 							ResultSet rs2= stmt.executeQuery(sqlSubjects);
 							if(rs2.next())
 							{
@@ -228,12 +236,24 @@ public class classesPanelContent extends JPanel {
 		panel.add(lblNewLabel_1_1);
 
 		tableList = new JTable();
+		tableList.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				
+				DefaultTableModel modelDefault = (DefaultTableModel)tableList.getModel();
+				int selectedRowIndex = tableList.getSelectedRow();
+				
+				lblStudentDisplay.setText("Student: " + modelDefault.getValueAt(selectedRowIndex, 1).toString());
+				mssvChoosen = modelDefault.getValueAt(selectedRowIndex, 0).toString();
+				indexChoosen= tableList.getSelectedRow();
+			}
+		});
 		tableList.setUpdateSelectionOnSort(false);
 		tableList.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		tableList.setBounds(27, 135, 441, 220);
+		tableList.setBounds(27, 135, 441, 134);
 		scroll = new JScrollPane(tableList);
 		scroll.setFont(new Font("UTM Androgyne", Font.PLAIN, 18));
-		scroll.setBounds(27, 135, 441, 220);
+		scroll.setBounds(27, 135, 833, 134);
 		panel.add(scroll);
 
 		
@@ -241,6 +261,8 @@ public class classesPanelContent extends JPanel {
 		JButton btnNewButton = new JButton("Add Student to Class");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				
+				
 			}
 		});
 		btnNewButton.addMouseListener(new MouseAdapter() {
@@ -251,15 +273,68 @@ public class classesPanelContent extends JPanel {
 					Class.forName("com.mysql.jdbc.Driver");
 					Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/hiberate?characterEncoding=latin1","root","root");
 					Statement stmt=con.createStatement();
-					String sqlInsert ="update users set id_class =(select id_class from classes where name_class=?) where indentity_student=?;";
+					String sqlInsert ="INSERT INTO listsubjectclass (id_user,code_subject) \r\n" + 
+							"SELECT * FROM( SELECT u.id_user,s.code_subject from users as u, subjects as s WHERE s.code_subject=? and u.indentity_student= ? LIMIT 1\r\n" + 
+							") as tmp;";
 					PreparedStatement pstmt = (PreparedStatement) con.prepareStatement(sqlInsert);
-					pstmt.setString(1, classChoosen);
+					pstmt.setString(1, codeSubjectChoosen);
 					pstmt.setString(2, mssv);
-					int rs = pstmt.executeUpdate();
+			
+					
+				int rs = pstmt.executeUpdate();
 					System.out.println(rs);
-					showDataTable(classChoosen, stmt);
+//					showDataTable(classChoosen, stmt);
 					if(rs!=0)
 					{
+						try {
+					
+							if(codeSubjectChoosen=="All")
+							{
+								showDataTable(classChoosen, stmt);
+								
+							}
+							else
+							{
+								sqlSubjects = "select u.* from listsubjectclass as lsc, users as u,subjects as s where s.code_subject = lsc.code_subject \r\n" + 
+										"and u.id_user = lsc.id_user and lsc.code_subject = '"+ codeSubjectChoosen + "';";
+								ResultSet rs2= stmt.executeQuery(sqlSubjects);
+								if(rs2.next())
+								{
+									 DefaultTableModel model = new DefaultTableModel();
+										model.addColumn("MSSV");
+										model.addColumn("Name");
+										model.addColumn("Gender");
+										model.addColumn("CMND");
+										model.addRow(new Object[] {
+												rs2.getString("indentity_student"),
+												rs2.getString("name"),
+												rs2.getBoolean("gender")? "Male": "Female",
+														rs2.getString("indentity_number"),
+												
+											});
+										while(rs2.next())
+										{
+											model.addRow(new Object[] {
+												rs2.getString("indentity_student"),
+												rs2.getString("name"),
+												rs2.getBoolean("gender")? "Male": "Female",
+												rs2.getString("indentity_number"),
+												
+											});
+										}
+										System.out.println(model.getColumnCount());
+										tableList.setModel(model);
+										tableList.getColumnModel().getColumn(1).setPreferredWidth(180);
+								}
+							}
+
+									
+									
+								
+						} catch (SQLException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
 						JOptionPane.showMessageDialog(null,"Add student into class " + classChoosen + " sucessfull");
 
 					}
@@ -284,6 +359,112 @@ public class classesPanelContent extends JPanel {
 		lblNewLabel_1_2.setFont(new Font("UTM Androgyne", Font.PLAIN, 16));
 		lblNewLabel_1_2.setBounds(0, 49, 123, 23);
 		panel.add(lblNewLabel_1_2);
+		
+	
+		
+		JButton btnDeleteStudent = new JButton("Delete Student");
+		btnDeleteStudent.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				System.out.println(mssvChoosen);
+				System.out.println(codeSubjectChoosen);
+
+				if(mssvChoosen.length()>0)
+				{
+					if(codeSubjectChoosen =="All")
+					{
+						JOptionPane.showMessageDialog(null,"Cant' delete Student have identiy: " + mssvChoosen + ". Because it require in class");
+					}
+					else
+					{
+						
+						try {
+							Class.forName("com.mysql.jdbc.Driver");
+							Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/hiberate?characterEncoding=UTF-8","root","root");
+							Statement stmt=con.createStatement();
+							String sqlInsert ="DELETE FROM listsubjectclass where id_user = (select u.id_user from users as u where u.indentity_student= ?) and code_subject=?;";
+							PreparedStatement pstmt = (PreparedStatement) con.prepareStatement(sqlInsert);
+							pstmt.setString(1, mssvChoosen);
+							pstmt.setString(2, codeSubjectChoosen);
+							int rs = pstmt.executeUpdate();
+							System.out.println(rs);
+							if(rs!=0)
+							{
+								try {
+								
+									if(codeSubjectChoosen=="All")
+									{
+										showDataTable(classChoosen, stmt);
+										
+									}
+									else
+									{
+										sqlSubjects = "select u.* from listsubjectclass as lsc, users as u,subjects as s where s.code_subject = lsc.code_subject \r\n" + 
+												"and u.id_user = lsc.id_user and lsc.code_subject = '"+ codeSubjectChoosen + "';";
+										ResultSet rs2= stmt.executeQuery(sqlSubjects);
+										if(rs2.next())
+										{
+											 DefaultTableModel model = new DefaultTableModel();
+												model.addColumn("MSSV");
+												model.addColumn("Name");
+												model.addColumn("Gender");
+												model.addColumn("CMND");
+												model.addRow(new Object[] {
+														rs2.getString("indentity_student"),
+														rs2.getString("name"),
+														rs2.getBoolean("gender")? "Male": "Female",
+																rs2.getString("indentity_number"),
+														
+													});
+												while(rs2.next())
+												{
+													model.addRow(new Object[] {
+														rs2.getString("indentity_student"),
+														rs2.getString("name"),
+														rs2.getBoolean("gender")? "Male": "Female",
+														rs2.getString("indentity_number"),
+														
+													});
+												}
+												System.out.println(model.getColumnCount());
+												tableList.setModel(model);
+												tableList.getColumnModel().getColumn(1).setPreferredWidth(180);
+										}
+									}
+
+											
+											
+										
+								}  catch (SQLException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}	
+								JOptionPane.showMessageDialog(null,"Delete Student have identiy: " + mssvChoosen + " sucessfull");
+
+							}
+								
+							
+							else
+							{
+								JOptionPane.showMessageDialog(null,"Can't Delete Student: " + mssvChoosen );
+							}
+
+							
+							
+						} catch (Exception e2) {
+							System.out.println(e2.getMessage());
+							JOptionPane.showMessageDialog(null,e2.getMessage());
+
+							// TODO: handle exception
+						}
+						
+					}
+					
+				}
+			}
+		});
+		btnDeleteStudent.setBounds(309, 300, 159, 23);
+		panel.add(btnDeleteStudent);
 		
 		JButton btnImportDataFrom = new JButton("Import data from file");
 		btnImportDataFrom.addActionListener(new ActionListener() {

@@ -51,7 +51,7 @@ public class schedulesPanelContent extends JPanel {
 
 	public schedulesPanelContent() {
 		setLayout(null);
-		setSize(521,437);
+		setSize(521,600);
 		JLabel lblNewLabel = new JLabel("SCHEDULES CONTENT");
 		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNewLabel.setFont(new Font("UTM Androgyne", Font.PLAIN, 17));
@@ -61,7 +61,7 @@ public class schedulesPanelContent extends JPanel {
 		JPanel panel = new JPanel();
 		panel.setLayout(null);
 		panel.setBorder(new LineBorder(new Color(0, 0, 0)));
-		panel.setBounds(20, 59, 491, 366);
+		panel.setBounds(20, 59, 491, 530);
 		add(panel);
 		
 		JComboBox comboBoxChooseClass = new JComboBox();
@@ -112,11 +112,17 @@ public class schedulesPanelContent extends JPanel {
 		panel.add(lblNewLabel_1_1);
 		
 		tableSubject = new JTable();
-		tableSubject.setBounds(38, 137, 428, 204);
+		tableSubject.setBounds(27, 135, 441, 134);
 		scroll = new JScrollPane(tableSubject);
 		scroll.setFont(new Font("UTM Androgyne", Font.PLAIN, 18));
-		scroll.setBounds(27, 135, 441, 220);
+		scroll.setBounds(27, 135, 441, 134);
 		panel.add(scroll);
+		
+		JLabel lblNewLabel_1_1_1 = new JLabel("Student: ");
+		lblNewLabel_1_1_1.setHorizontalAlignment(SwingConstants.LEFT);
+		lblNewLabel_1_1_1.setFont(new Font("UTM Androgyne", Font.PLAIN, 16));
+		lblNewLabel_1_1_1.setBounds(27, 309, 143, 23);
+		panel.add(lblNewLabel_1_1_1);
 
 		
 		

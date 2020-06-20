@@ -71,7 +71,7 @@ public class Dashboard extends JFrame {
 	
 	public Dashboard() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 767, 476);
+		setBounds(100, 100, 1001, 633);
 		contentPane = new JPanel();
 		contentPane.setBackground(new Color(47, 79, 79));
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -80,7 +80,7 @@ public class Dashboard extends JFrame {
 	
 		JPanel panel = new JPanel();
 		panel.setBackground(new Color(0, 128, 128));
-		panel.setBounds(0, 0, 230, 447);
+		panel.setBounds(0, 0, 230, 600);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
@@ -188,7 +188,7 @@ public class Dashboard extends JFrame {
 		panel.add(panelDetailStudent);
 		panelDetailStudent.setLayout(null);
 		
-		JLabel lbl_home_1_1_1 = new JLabel("Detail Students");
+		JLabel lbl_home_1_1_1 = new JLabel("View Grades");
 		lbl_home_1_1_1.setForeground(Color.WHITE);
 		lbl_home_1_1_1.setHorizontalAlignment(SwingConstants.RIGHT);
 		lbl_home_1_1_1.setFont(new Font("UTM Androgyne", Font.PLAIN, 16));
@@ -272,19 +272,23 @@ public class Dashboard extends JFrame {
 		
 		panelContent = new JPanel();
 		panelContent.setBackground(new Color(47, 79, 79));
-		panelContent.setBounds(230, 0, 521, 437);
+		panelContent.setBounds(230, 0, 745, 600);
 		contentPane.add(panelContent);
 		panelContent.setLayout(null);
 		homePanelContent = new homePanelContent();
-		homePanelContent.setBounds(0,0,521,437);
+		homePanelContent.setBounds(0,0,740,600);
 	
 		detailStudentPanelContent = new detailStudentPanelContent();
+		detailStudentPanelContent.setSize(900, 600);
 		detailStudentPanelContent.setVisible(false);
 		classesPanelContent = new classesPanelContent();
+		classesPanelContent.setSize(900, 600);
 		classesPanelContent.setVisible(false);
 		reExaminationsPanelContent = new reExaminationsPanelContent();
+		reExaminationsPanelContent.setSize(900, 600);
 		reExaminationsPanelContent.setVisible(false);
 		schedulesPanelContent = new schedulesPanelContent();
+		schedulesPanelContent.setSize(900, 600);
 		schedulesPanelContent.setVisible(false);
 
 		

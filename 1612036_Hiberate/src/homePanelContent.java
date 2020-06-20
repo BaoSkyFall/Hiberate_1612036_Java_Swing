@@ -10,8 +10,8 @@ public class homePanelContent extends JPanel {
 	 */
 	public homePanelContent() {
 		setLayout(null);
-		setSize(521,437);
-		setBounds(230,0,521,437);
+		setSize(521,600);
+		setBounds(230,0,521,600);
 		JLabel lblNewLabel = new JLabel("HOME CONTENT");
 		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNewLabel.setFont(new Font("UTM Androgyne", Font.PLAIN, 17));
