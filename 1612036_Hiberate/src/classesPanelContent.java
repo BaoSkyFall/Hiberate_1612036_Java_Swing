@@ -31,6 +31,8 @@ import java.awt.Color;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JTable;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -52,8 +54,10 @@ public class classesPanelContent extends JPanel {
 	 * Create the panel.
 	 */
 	public String sqlClasses = "";
+	public String sqlSubjects = "";
 	public String sqlStudents = "";
 	public String classChoosen= "";
+	public String codeSubjectChoosen="";
 	public classesPanelContent() {
 	
 		setSize(521,437);
@@ -69,7 +73,82 @@ public class classesPanelContent extends JPanel {
 		panel.setBorder(new LineBorder(new Color(0, 0, 0)));
 		add(panel);
 		panel.setLayout(null);
-		
+		JComboBox comboBoxSubject = new JComboBox();
+		comboBoxSubject.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				 JComboBox comboBox = (JComboBox) e.getSource();
+		          Object o = comboBox.getSelectedItem();
+					System.out.println(o);
+				
+					
+					try {
+						Class.forName("com.mysql.jdbc.Driver");
+						Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/hiberate?characterEncoding=UTF-8","root","root");
+						Statement stmt=con.createStatement();
+						if(o=="All")
+						{
+							showDataTable(classChoosen, stmt);
+							
+						}
+						else
+						{
+							sqlSubjects = "select u.* from listsubjectclass as lsc, users as u,subjects as s where s.code_subject = lsc.code_subject \r\n" + 
+									"and u.id_user = lsc.id_user and lsc.code_subject = '"+ o.toString() + "';";
+							ResultSet rs2= stmt.executeQuery(sqlSubjects);
+							if(rs2.next())
+							{
+								 DefaultTableModel model = new DefaultTableModel();
+									model.addColumn("MSSV");
+									model.addColumn("Name");
+									model.addColumn("Gender");
+									model.addColumn("CMND");
+									model.addRow(new Object[] {
+											rs2.getString("indentity_student"),
+											rs2.getString("name"),
+											rs2.getBoolean("gender")? "Male": "Female",
+													rs2.getString("indentity_number"),
+											
+										});
+									while(rs2.next())
+									{
+										model.addRow(new Object[] {
+											rs2.getString("indentity_student"),
+											rs2.getString("name"),
+											rs2.getBoolean("gender")? "Male": "Female",
+											rs2.getString("indentity_number"),
+											
+										});
+									}
+									System.out.println(model.getColumnCount());
+									tableList.setModel(model);
+									tableList.getColumnModel().getColumn(1).setPreferredWidth(180);
+							}
+						}
+
+								
+								
+							
+					} catch (ClassNotFoundException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+					
+
+						
+						
+			}	
+		});
+		comboBoxSubject.setFont(new Font("UTM Androgyne", Font.PLAIN, 16));
+		comboBoxSubject.setBackground(Color.WHITE);
+		comboBoxSubject.setBounds(142, 50, 198, 22);
+		comboBoxSubject.addItem("All");
+		panel.add(comboBoxSubject);
 		JComboBox comboBoxChooseClass = new JComboBox();
 		comboBoxChooseClass.setBackground(new Color(255, 255, 255));
 		comboBoxChooseClass.setFont(new Font("Arial Black", Font.PLAIN, 16));
@@ -88,9 +167,35 @@ public class classesPanelContent extends JPanel {
 						Class.forName("com.mysql.jdbc.Driver");
 						Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/hiberate?characterEncoding=UTF-8","root","root");
 						Statement stmt=con.createStatement();
-						
+						classChoosen= o.toString();
 						showDataTable(o.toString(), stmt);
+						sqlSubjects = "select s.* from subjects as s, classes as c where s.id_class=c.id_class and c.name_class='" +o.toString()+"';";
 
+						ResultSet rs2= stmt.executeQuery(sqlSubjects);
+						if(rs2.next())
+						{
+							List<String> list2 = new ArrayList<>();
+			                ComboBoxModel model = comboBoxSubject.getModel();
+			                DefaultComboBoxModel<String> dfModel = new DefaultComboBoxModel<String>();
+			                //Delete old comboxSubject
+//			                for(int i=0;i<model.getSize();i++)
+//			                {
+//			                	if(i!=0)
+//			                	{
+//			                		comboBoxSubject.remove(i);;
+//			                	}
+//			                }
+							String item = new String(rs2.getString("code_subject"));
+							comboBoxSubject.setModel(dfModel);
+							comboBoxSubject.addItem("All");
+							comboBoxSubject.addItem(item);
+							list2.add(rs2.getString("code_subject"));
+							while(rs2.next()){
+							
+								comboBoxSubject.addItem(rs2.getString("code_subject"));
+								list2.add(rs2.getString("code_subject"));
+								}
+						}
 								
 								
 							
@@ -172,11 +277,7 @@ public class classesPanelContent extends JPanel {
 		btnNewButton.setBounds(309, 79, 159, 23);
 		panel.add(btnNewButton);
 		
-		JComboBox comboBoxChooseClass_1 = new JComboBox();
-		comboBoxChooseClass_1.setFont(new Font("UTM Androgyne", Font.PLAIN, 16));
-		comboBoxChooseClass_1.setBackground(Color.WHITE);
-		comboBoxChooseClass_1.setBounds(142, 50, 198, 22);
-		panel.add(comboBoxChooseClass_1);
+	
 		
 		JLabel lblNewLabel_1_2 = new JLabel("Choose subject :");
 		lblNewLabel_1_2.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -303,9 +404,10 @@ public class classesPanelContent extends JPanel {
 			Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/hiberate?characterEncoding=UTF-8","root","root");
 			Statement stmt=con.createStatement();
 			sqlClasses = "select * from classes;";
+
 			System.out.println(sqlClasses);
 			ResultSet rs = stmt.executeQuery(sqlClasses);
-
+	
 			if(rs.next())
 			{
 				
@@ -313,7 +415,9 @@ public class classesPanelContent extends JPanel {
 				
 				String item = new String(rs.getString("name_class"));
 				comboBoxChooseClass.addItem(item);
+				classChoosen= item;
 				list.add(rs.getString("name_class"));
+				sqlSubjects = "select s.* from subjects as s, classes as c where s.id_class=c.id_class and c.id_class=" + rs.getString("id_class");
 				while(rs.next()){
 				
 					comboBoxChooseClass.addItem(rs.getString("name_class"));
@@ -321,57 +425,94 @@ public class classesPanelContent extends JPanel {
 					}
 				showDataTable(list.get(0), stmt);
 			
-	}
+			}
+			ResultSet rs2= stmt.executeQuery(sqlSubjects);
+			if(rs2.next())
+			{
+				List<String> list2 = new ArrayList<>();
+				
+				String item = new String(rs2.getString("code_subject"));
+				comboBoxSubject.addItem(item);
+				list2.add(rs2.getString("code_subject"));
+				while(rs2.next()){
+				
+					comboBoxSubject.addItem(rs2.getString("code_subject"));
+					list2.add(rs2.getString("code_subject"));
+					}
+			}
+			
 		}catch(Exception e1) {
 		System.out.println(e1);
 	}
 	}
+	public void getSubjectCodeFromClass(String className,Statement stmt) throws SQLException
+	{
+		sqlSubjects = "select s.* from subjects as s, classes as c where s.id_class=c.id_class and c.id_class=";
+		ResultSet rs2= stmt.executeQuery(sqlSubjects);
+//		if(rs2.next())
+//		{
+//			List<String> list2 = new ArrayList<>();
+//			
+//			String item = new String(rs2.getString("code_subject"));
+//			comboBoxSubject.addItem(item);
+//			list2.add(rs2.getString("code_subject"));
+//			while(rs2.next()){
+//			
+//				comboBoxSubject.addItem(rs2.getString("code_subject"));
+//				list2.add(rs2.getString("code_subject"));
+//				}
+//		}
+	}
 	
 	public void showDataTable(String className,Statement stmt) throws SQLException
 	{
-		sqlStudents= "select u.*,c.name_class from users as u,classes as c where u.id_class = c.id_class and c.name_class='"+ className +"'";
-		ResultSet resultStudent = stmt.executeQuery(sqlStudents);
-		System.out.println(sqlStudents);
-		classChoosen= className;
-		if(resultStudent.next())
+		if(className.length()>0)
 		{
-			 DefaultTableModel model = new DefaultTableModel();
-			model.addColumn("MSSV");
-			model.addColumn("Name");
-			model.addColumn("Gender");
-			model.addColumn("CMND");
-			model.addRow(new Object[] {
-					resultStudent.getString("indentity_student"),
-					resultStudent.getString("name"),
-					resultStudent.getBoolean("gender")? "Male": "Female",
-					resultStudent.getString("indentity_number"),
-					
-				});
-			while(resultStudent.next())
+			sqlStudents= "select u.*,c.name_class from users as u,classes as c where u.id_class = c.id_class and c.name_class='"+ className +"'";
+			ResultSet resultStudent = stmt.executeQuery(sqlStudents);
+			System.out.println(sqlStudents);
+			classChoosen= className;
+			if(resultStudent.next())
 			{
+				 DefaultTableModel model = new DefaultTableModel();
+				model.addColumn("MSSV");
+				model.addColumn("Name");
+				model.addColumn("Gender");
+				model.addColumn("CMND");
 				model.addRow(new Object[] {
-					resultStudent.getString("indentity_student"),
-					resultStudent.getString("name"),
-					resultStudent.getBoolean("gender")? "Male": "Female",
-					resultStudent.getString("indentity_number"),
-					
-				});
+						resultStudent.getString("indentity_student"),
+						resultStudent.getString("name"),
+						resultStudent.getBoolean("gender")? "Male": "Female",
+						resultStudent.getString("indentity_number"),
+						
+					});
+				while(resultStudent.next())
+				{
+					model.addRow(new Object[] {
+						resultStudent.getString("indentity_student"),
+						resultStudent.getString("name"),
+						resultStudent.getBoolean("gender")? "Male": "Female",
+						resultStudent.getString("indentity_number"),
+						
+					});
+				}
+				System.out.println(model.getColumnCount());
+				tableList.setModel(model);
+				tableList.getColumnModel().getColumn(1).setPreferredWidth(180);
+
+
+				
 			}
-			System.out.println(model.getColumnCount());
-			tableList.setModel(model);
-			tableList.getColumnModel().getColumn(1).setPreferredWidth(180);
-
-
 			
+			
+		
+		else
+		{
+			JOptionPane.showMessageDialog(null,"Get Data Fail");
+
+		}
 		}
 		
-		
-	
-	else
-	{
-		JOptionPane.showMessageDialog(null,"Get Data Fail");
-
-	}
 		
 	}
 }
