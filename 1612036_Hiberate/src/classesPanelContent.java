@@ -80,7 +80,7 @@ public class classesPanelContent extends JPanel {
 		JLabel lblStudentDisplay = new JLabel("Student :");
 		lblStudentDisplay.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStudentDisplay.setFont(new Font("UTM Androgyne", Font.PLAIN, 16));
-		lblStudentDisplay.setBounds(27, 296, 242, 23);
+		lblStudentDisplay.setBounds(27, 475, 242, 23);
 		panel.add(lblStudentDisplay);
 		comboBoxSubject.addActionListener(new ActionListener() {
 			@Override
@@ -253,7 +253,7 @@ public class classesPanelContent extends JPanel {
 		tableList.setBounds(27, 135, 441, 134);
 		scroll = new JScrollPane(tableList);
 		scroll.setFont(new Font("UTM Androgyne", Font.PLAIN, 18));
-		scroll.setBounds(27, 135, 833, 134);
+		scroll.setBounds(27, 135, 440, 322);
 		panel.add(scroll);
 
 		
@@ -463,7 +463,7 @@ public class classesPanelContent extends JPanel {
 				}
 			}
 		});
-		btnDeleteStudent.setBounds(309, 300, 159, 23);
+		btnDeleteStudent.setBounds(309, 479, 159, 23);
 		panel.add(btnDeleteStudent);
 		
 		JButton btnImportDataFrom = new JButton("Import data from file");
@@ -537,6 +537,9 @@ public class classesPanelContent extends JPanel {
 								            System.out.println(Arrays.toString(updateCounts));
 								            connection.commit();
 								            connection.setAutoCommit(true);
+							                DefaultComboBoxModel<String> dfModel = new DefaultComboBoxModel<String>();
+							                comboBoxSubject.setModel(dfModel);
+							                comboBoxSubject.addItem("All");
 								        } catch (BatchUpdateException batchUpdateException) {
 								        } catch (SQLException e1) {
 								        }

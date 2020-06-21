@@ -23,6 +23,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.SystemColor;
 import java.sql.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 public class Login extends JFrame {
 
 	private JPanel contentPane;
@@ -95,7 +97,6 @@ public class Login extends JFrame {
 		txt_password.setFont(new Font("Tahoma", Font.PLAIN, 22));
 		txt_password.setBounds(163, 75, 257, 34);
 		panel.add(txt_password);
-		
 		JButton btnNewButton = new JButton("Signin");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -110,6 +111,7 @@ public class Login extends JFrame {
 					{
 						Boolean isStudent  = rs.getBoolean("isStudent");
 						String name = rs.getString("name");
+						String username = rs.getString("username");
 						if(!isStudent)
 						{
 							Dashboard Dashboard = new Dashboard();
@@ -121,9 +123,11 @@ public class Login extends JFrame {
 						}
 						else
 						{
+							Student Student = new Student(username);
+							Student.setVisible(true);
+							Student.setName(name);
+							Login.this.dispose();
 							
-							JOptionPane.showMessageDialog(null,"Login Fail");
-
 						}
 						
 						
@@ -143,16 +147,23 @@ public class Login extends JFrame {
 		btnNewButton.setForeground(SystemColor.textHighlightText);
 		btnNewButton.setFont(new Font("UTM Androgyne", Font.PLAIN, 20));
 	
-		btnNewButton.setBounds(133, 140, 175, 51);
+		btnNewButton.setBounds(122, 140, 207, 51);
 		panel.add(btnNewButton);
 		
-		JLabel lblLogo = new JLabel("");
-		lblLogo.setHorizontalAlignment(SwingConstants.CENTER);
-		lblLogo.setForeground(Color.BLACK);
-		lblLogo.setFont(new Font("UTM Androgyne", Font.PLAIN, 26));
-		lblLogo.setBounds(0, 219, 448, 60);
-		lblLogo.setIcon(new ImageIcon(img_hcmus));
-		panel.add(lblLogo);
+		JButton btnChangePassword = new JButton("Change Password");
+		btnChangePassword.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				ChangePass ChangePass = new ChangePass();
+				ChangePass.setVisible(true);
+				Login.this.dispose();
+			}
+		});
+		btnChangePassword.setForeground(Color.WHITE);
+		btnChangePassword.setFont(new Font("UTM Androgyne", Font.PLAIN, 20));
+		btnChangePassword.setBackground(SystemColor.textHighlight);
+		btnChangePassword.setBounds(122, 217, 207, 51);
+		panel.add(btnChangePassword);
 		
 		JLabel lblLogin = new JLabel("");
 		lblLogin.setHorizontalAlignment(SwingConstants.CENTER);

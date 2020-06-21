@@ -24,6 +24,8 @@ import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JScrollPane;
 import java.awt.Component;
+
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JTable;
 import java.awt.event.ActionListener;
@@ -220,7 +222,27 @@ public class schedulesPanelContent extends JPanel {
 						            System.out.println(Arrays.toString(updateCounts2));
 						            connection.commit();
 						            connection.setAutoCommit(true);
-						        } catch (BatchUpdateException batchUpdateException) {
+						            sqlSubjects = "select * from classes;";
+									System.out.println(sqlSubjects);
+									ResultSet rs2 = stmt.executeQuery(sqlSubjects);
+					               
+									if(rs2.next())
+									{
+										
+										List<String> list2 = new ArrayList<>();
+										 DefaultComboBoxModel<String> dfModel = new DefaultComboBoxModel<String>();
+							                comboBoxChooseClass.setModel(dfModel);
+										String item = new String(rs2.getString("name_class"));
+										comboBoxChooseClass.addItem(item);
+										list2.add(rs2.getString("name_class"));
+										while(rs2.next()){
+										
+											comboBoxChooseClass.addItem(rs2.getString("name_class"));
+											list2.add(rs2.getString("name_class"));
+											}
+										showDataTable(list2.get(0), stmt);		
+									}
+									} catch (BatchUpdateException batchUpdateException) {
 						        } catch (SQLException e1) {
 						        }
 							JOptionPane.showMessageDialog(null,"Add new Schedule in class: " + className + " sucessfull");

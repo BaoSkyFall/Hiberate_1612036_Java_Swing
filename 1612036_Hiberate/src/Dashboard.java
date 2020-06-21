@@ -21,15 +21,11 @@ public class Dashboard extends JFrame {
 
 	private JPanel contentPane;
 	private JLabel lblPortal;
-	private JPanel panelHome;
 	private JPanel panelViewClasses;
 	private JPanel panelSchedules;
 	private JPanel panelDetailStudent;
-	private JPanel panelReExamination;
 	private JPanel panelLogout;
-	private JLabel lbl_home;
 	private JPanel panelContent;
-	private homePanelContent homePanelContent;
 	private detailStudentPanelContent detailStudentContent;
 	private classesPanelContent classesPanelContent;
 	private reExaminationsPanelContent reExaminationsPanelContent;
@@ -44,7 +40,6 @@ public class Dashboard extends JFrame {
 	private JLabel lblIconClasses;
 	private JLabel lblIconSchedules;
 	private JLabel lblIconStudents;
-	private JLabel lblIconReExaminations;
 	private JLabel lblIconLogout;
 	private detailStudentPanelContent detailStudentPanelContent;
 	private JLabel lblPortal_2;
@@ -87,41 +82,10 @@ public class Dashboard extends JFrame {
 		lblPortal = new JLabel("");
 		lblPortal.setHorizontalAlignment(SwingConstants.CENTER);
 		lblPortal.setBounds(10, 11, 90, 90);
-		lblPortal.setFont(new Font("UTM Androgyne", Font.PLAIN, 24));
+		lblPortal.setFont(new Font("UTM Androgyne", Font.PLAIN, 14));
 		lblPortal.setLayout(null);
 		lblPortal.setIcon(new ImageIcon(img_logo));
 		panel.add(lblPortal);
-		
-		panelHome = new JPanel();
-		panelHome.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				menuClicked(homePanelContent,panelHome);
-			}
-		});
-		panelHome.setBorder(new LineBorder(new Color(255, 255, 255)));
-		panelHome.setBackground(new Color(255, 0, 0));
-		panelHome.setBounds(-1, 104, 230, 51);
-		panel.add(panelHome);
-		panelHome.setLayout(null);
-		
-		lbl_home = new JLabel("Home");
-		lbl_home.setForeground(Color.WHITE);
-		lbl_home.setHorizontalAlignment(SwingConstants.RIGHT);
-		lbl_home.setFont(new Font("UTM Androgyne", Font.PLAIN, 16));
-		lbl_home.setBounds(74, 11, 118, 20);
-		panelHome.add(lbl_home);
-		
-		JLabel lblIconHome = new JLabel("");
-		lblIconHome.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				menuClicked(homePanelContent,panelHome);
-			}
-		});
-		lblIconHome.setBounds(19, 0, 45, 45);
-		lblIconHome.setIcon(new ImageIcon(img_home));
-		panelHome.add(lblIconHome);
 		
 		panelViewClasses = new JPanel();
 		panelViewClasses.addMouseListener(new MouseAdapter() {
@@ -132,7 +96,7 @@ public class Dashboard extends JFrame {
 			}
 		});
 		panelViewClasses.setBorder(new LineBorder(new Color(255, 255, 255)));
-		panelViewClasses.setBackground(new Color(112, 128, 144));
+		panelViewClasses.setBackground(Color.RED);
 		panelViewClasses.setBounds(-1, 152, 230, 51);
 		panel.add(panelViewClasses);
 		panelViewClasses.setLayout(null);
@@ -200,33 +164,6 @@ public class Dashboard extends JFrame {
 		lblIconStudents.setIcon(new ImageIcon(img_students));
 		panelDetailStudent.add(lblIconStudents);
 		
-		panelReExamination = new JPanel();
-		panelReExamination.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				menuClicked(reExaminationsPanelContent,panelReExamination);
-			}
-		});
-		panelReExamination.setBorder(new LineBorder(new Color(255, 255, 255)));
-		panelReExamination.setBackground(new Color(112, 128, 144));
-		panelReExamination.setBounds(-1, 305, 230, 51);
-		panel.add(panelReExamination);
-		panelReExamination.setLayout(null);
-		
-		JLabel panelReExaminations = new JLabel("Re-Examinations");
-		panelReExaminations.setForeground(Color.WHITE);
-		panelReExaminations.setHorizontalAlignment(SwingConstants.RIGHT);
-		panelReExaminations.setFont(new Font("UTM Androgyne", Font.PLAIN, 16));
-		panelReExaminations.setBounds(63, 11, 133, 24);
-		panelReExamination.add(panelReExaminations);
-		
-		lblIconReExaminations = new JLabel("");
-	
-		lblIconReExaminations.setBounds(10, 0, 45, 45);
-		lblIconReExaminations.setIcon(new ImageIcon(img_reExam));
-
-		panelReExamination.add(lblIconReExaminations);
-		
 		panelLogout = new JPanel();
 		panelLogout.addMouseListener(new MouseAdapter() {
 			@Override
@@ -242,7 +179,7 @@ public class Dashboard extends JFrame {
 		});
 		panelLogout.setBorder(new LineBorder(new Color(255, 255, 255)));
 		panelLogout.setBackground(new Color(112, 128, 144));
-		panelLogout.setBounds(-1, 356, 230, 51);
+		panelLogout.setBounds(-1, 304, 230, 51);
 		panel.add(panelLogout);
 		panelLogout.setLayout(null);
 		
@@ -275,25 +212,19 @@ public class Dashboard extends JFrame {
 		panelContent.setBounds(230, 0, 745, 600);
 		contentPane.add(panelContent);
 		panelContent.setLayout(null);
-		homePanelContent = new homePanelContent();
-		homePanelContent.setBounds(0,0,740,600);
 	
 		detailStudentPanelContent = new detailStudentPanelContent();
 		detailStudentPanelContent.setSize(900, 600);
 		detailStudentPanelContent.setVisible(false);
 		classesPanelContent = new classesPanelContent();
 		classesPanelContent.setSize(900, 600);
-		classesPanelContent.setVisible(false);
+		classesPanelContent.setVisible(true);
 		reExaminationsPanelContent = new reExaminationsPanelContent();
 		reExaminationsPanelContent.setSize(900, 600);
 		reExaminationsPanelContent.setVisible(false);
 		schedulesPanelContent = new schedulesPanelContent();
 		schedulesPanelContent.setSize(900, 600);
 		schedulesPanelContent.setVisible(false);
-
-		
-		
-		panelContent.add(homePanelContent);
 		panelContent.add(detailStudentPanelContent);
 		panelContent.add(classesPanelContent);
 		panelContent.add(reExaminationsPanelContent);
@@ -303,17 +234,14 @@ public class Dashboard extends JFrame {
 		
 	}
 	public void menuClicked(JPanel panel,JPanel panel2) {
-		homePanelContent.setVisible(false);
 		detailStudentPanelContent.setVisible(false);
 		classesPanelContent.setVisible(false);
 		reExaminationsPanelContent.setVisible(false);
 		schedulesPanelContent.setVisible(false);
-		panelHome.setBackground(new Color(112,128,144));
 		panelLogout.setBackground(new Color(112,128,144));
 		panelDetailStudent.setBackground(new Color(112,128,144));
 		panelSchedules.setBackground(new Color(112,128,144));
 		panelViewClasses.setBackground(new Color(112,128,144));
-		panelReExamination.setBackground(new Color(112,128,144));
 		
 		panel.setVisible(true);
 		panel2.setBackground(Color.RED);

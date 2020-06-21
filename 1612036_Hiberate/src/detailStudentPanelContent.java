@@ -72,11 +72,13 @@ public class detailStudentPanelContent extends JPanel {
 		public float midTermGrade =0;
 		public float finalGrade =0;
 		public float otherGrade =0;
-		public float totalGrade =0;
+		public double totalGrade =0;
 		public int indexChoosen=-1;
 		private JTextField textFieldMidTerm;
 		private JTextField textFieldFinal;
 		private JTextField textFieldOther;
+		private JLabel lblPassDisplay;
+		private JLabel lblFailDisplay;
 		public detailStudentPanelContent() {
 		
 			setSize(900,600);
@@ -88,7 +90,7 @@ public class detailStudentPanelContent extends JPanel {
 			add(lblNewLabel);
 			
 			JPanel panel = new JPanel();
-			panel.setBounds(20, 59, 870, 530);
+			panel.setBounds(20, 46, 870, 530);
 			panel.setBorder(new LineBorder(new Color(0, 0, 0)));
 			add(panel);
 			panel.setLayout(null);
@@ -165,11 +167,14 @@ public class detailStudentPanelContent extends JPanel {
 							sqlSubjects = "select s.* from subjects as s, classes as c where s.id_class=c.id_class and c.name_class='" +o.toString()+"';";
 
 							ResultSet rs2= stmt.executeQuery(sqlSubjects);
+						     ComboBoxModel model = comboBoxSubject.getModel();
+				                DefaultComboBoxModel<String> dfModel = new DefaultComboBoxModel<String>();
+								comboBoxSubject.setModel(dfModel);
+
 							if(rs2.next())
 							{
 								List<String> list2 = new ArrayList<>();
-				                ComboBoxModel model = comboBoxSubject.getModel();
-				                DefaultComboBoxModel<String> dfModel = new DefaultComboBoxModel<String>();
+				           
 				                //Delete old comboxSubject
 //				                for(int i=0;i<model.getSize();i++)
 //				                {
@@ -179,7 +184,6 @@ public class detailStudentPanelContent extends JPanel {
 //				                	}
 //				                }
 								String item = new String(rs2.getString("code_subject"));
-								comboBoxSubject.setModel(dfModel);
 								comboBoxSubject.addItem(item);
 								list2.add(rs2.getString("code_subject"));
 								while(rs2.next()){
@@ -243,6 +247,10 @@ public class detailStudentPanelContent extends JPanel {
 			btnDeleteStudent.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
+					midTermGrade= Float.parseFloat(textFieldMidTerm.getText());
+					finalGrade= Float.parseFloat(textFieldFinal.getText());
+					otherGrade= Float.parseFloat(textFieldOther.getText());
+					totalGrade = Math.round(((midTermGrade+finalGrade+otherGrade)/3)*100)/100;
 					System.out.println(mssvChoosen);
 					System.out.println(codeSubjectChoosen);
 					System.out.println(midTermGrade);
@@ -256,86 +264,52 @@ public class detailStudentPanelContent extends JPanel {
 						}
 						else
 						{
-//							
-//							try {
-//								Class.forName("com.mysql.jdbc.Driver");
-//								Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/hiberate?characterEncoding=UTF-8","root","root");
-//								Statement stmt=con.createStatement();
-//								String sqlInsert ="DELETE FROM listsubjectclass where id_user = (select u.id_user from users as u where u.indentity_student= ?) and code_subject=?;";
-//								PreparedStatement pstmt = (PreparedStatement) con.prepareStatement(sqlInsert);
-//								pstmt.setString(1, mssvChoosen);
-//								pstmt.setString(2, codeSubjectChoosen);
-//								int rs = pstmt.executeUpdate();
-//								System.out.println(rs);
-//								if(rs!=0)
-//								{
-//									try {
-//									
-//										if(codeSubjectChoosen=="All")
-//										{
-////											showDataTable(classChoosen, stmt);
-//											
-//										}
-//										else
-//										{
-//											sqlSubjects = "select u.* from listsubjectclass as lsc, users as u,subjects as s where s.code_subject = lsc.code_subject \r\n" + 
-//													"and u.id_user = lsc.id_user and lsc.code_subject = '"+ codeSubjectChoosen + "';";
-//											ResultSet rs2= stmt.executeQuery(sqlSubjects);
-//											if(rs2.next())
-//											{
-//												 DefaultTableModel model = new DefaultTableModel();
-//													model.addColumn("MSSV");
-//													model.addColumn("Name");
-//													model.addColumn("Gender");
-//													model.addColumn("CMND");
-//													model.addRow(new Object[] {
-//															rs2.getString("indentity_student"),
-//															rs2.getString("name"),
-//															rs2.getBoolean("gender")? "Male": "Female",
-//																	rs2.getString("indentity_number"),
-//															
-//														});
-//													while(rs2.next())
-//													{
-//														model.addRow(new Object[] {
-//															rs2.getString("indentity_student"),
-//															rs2.getString("name"),
-//															rs2.getBoolean("gender")? "Male": "Female",
-//															rs2.getString("indentity_number"),
-//															
-//														});
-//													}
-//													System.out.println(model.getColumnCount());
-//													tableList.setModel(model);
-//													tableList.getColumnModel().getColumn(1).setPreferredWidth(180);
-//											}
-//										}
-//
-//												
-//												
-//											
-//									}  catch (SQLException e1) {
-//										// TODO Auto-generated catch block
-//										e1.printStackTrace();
-//									}	
-//									JOptionPane.showMessageDialog(null,"Delete Student have identiy: " + mssvChoosen + " sucessfull");
-//
-//								}
-//									
-//								
-//								else
-//								{
-//									JOptionPane.showMessageDialog(null,"Can't Delete Student: " + mssvChoosen );
-//								}
-//
-//								
-//								
-//							} catch (Exception e2) {
-//								System.out.println(e2.getMessage());
-//								JOptionPane.showMessageDialog(null,e2.getMessage());
-//
-//								// TODO: handle exception
-//							}
+							
+							try {
+								Class.forName("com.mysql.jdbc.Driver");
+								Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/hiberate?characterEncoding=UTF-8","root","root");
+								Statement stmt=con.createStatement();
+								String sqlInsert ="update grades set midterm_grade =?,final_grade =?,other_grade = ?,average_grade=?\r\n" + 
+										"where id_user= (select id_user from users where indentity_student=?) and code_subject = ?;";
+								PreparedStatement pstmt = (PreparedStatement) con.prepareStatement(sqlInsert);
+								pstmt.setDouble(1, midTermGrade);
+								pstmt.setDouble(2, finalGrade);
+								pstmt.setDouble(3, otherGrade);
+								pstmt.setDouble(4, totalGrade);
+								pstmt.setString(5, mssvChoosen);
+								pstmt.setString(6, codeSubjectChoosen);
+								int rs = pstmt.executeUpdate();
+								System.out.println(sqlInsert);
+								if(rs!=0)
+								{
+									
+									
+										if(codeSubjectChoosen=="All")
+										{
+//										showDataTable(classChoosen,codeSubjectChoosen, stmt);
+											
+										}
+										else
+										{
+									showDataTable(classChoosen,codeSubjectChoosen, stmt);
+									JOptionPane.showMessageDialog(null,"Update grade Student have identiy: " + mssvChoosen + " sucessfull");
+										}
+								
+									
+									}
+								else
+								{
+									JOptionPane.showMessageDialog(null,"Can't Update grade Student: " + mssvChoosen );
+								}
+
+								
+								
+							} catch (Exception e2) {
+								System.out.println(e2.getMessage());
+								JOptionPane.showMessageDialog(null,e2.getMessage());
+
+								// TODO: handle exception
+							}
 							
 						}
 						
@@ -376,7 +350,7 @@ public class detailStudentPanelContent extends JPanel {
 					 JTextField textField = (JTextField) e.getSource();
 					 if(textField.getText().length()>0)
 					 {
-					     midTermGrade = Float.parseFloat(textField.getText().toString());
+//					     midTermGrade = Float.parseFloat(textField.getText().toString());
 //						 if (e.getKeyChar() >= '0' && e.getKeyChar() <= '9') {
 //							 textFieldMidTerm.setEditable(true);
 //				            } else {
@@ -398,7 +372,7 @@ public class detailStudentPanelContent extends JPanel {
 					 JTextField textField1 = (JTextField) e.getSource();
 					 if(textField1.getText().length()>0)
 					 {
-					     finalGrade = Float.parseFloat(textField1.getText().toString());
+//					     finalGrade = Float.parseFloat(textField1.getText().toString());
 //						 if (e.getKeyChar() >= '0' && e.getKeyChar() <= '9') {
 //							 textFieldMidTerm.setEditable(true);
 //				            } else {
@@ -418,7 +392,7 @@ public class detailStudentPanelContent extends JPanel {
 					 JTextField textField2 = (JTextField) e.getSource();
 					 if(textField2.getText().length()>0)
 					 {
-					     otherGrade = Float.parseFloat(textField2.getText().toString());
+//					     otherGrade = Float.parseFloat(textField2.getText().toString());
 //						 if (e.getKeyChar() >= '0' && e.getKeyChar() <= '9') {
 //							 textFieldMidTerm.setEditable(true);
 //				            } else {
@@ -438,6 +412,30 @@ public class detailStudentPanelContent extends JPanel {
 			lblNameDisplay.setBounds(111, 330, 158, 23);
 			panel.add(lblNameDisplay);
 			
+			JLabel lblPass = new JLabel("Pass :");
+			lblPass.setHorizontalAlignment(SwingConstants.LEFT);
+			lblPass.setFont(new Font("UTM Bienvenue", Font.PLAIN, 16));
+			lblPass.setBounds(544, 278, 56, 23);
+			panel.add(lblPass);
+			
+			JLabel lblFail = new JLabel("Fail :");
+			lblFail.setHorizontalAlignment(SwingConstants.LEFT);
+			lblFail.setFont(new Font("UTM Bienvenue", Font.PLAIN, 16));
+			lblFail.setBounds(544, 328, 56, 23);
+			panel.add(lblFail);
+			
+			 lblPassDisplay = new JLabel("Pass :");
+			lblPassDisplay.setHorizontalAlignment(SwingConstants.LEFT);
+			lblPassDisplay.setFont(new Font("UTM Bienvenue", Font.PLAIN, 16));
+			lblPassDisplay.setBounds(590, 278, 143, 23);
+			panel.add(lblPassDisplay);
+			
+			lblFailDisplay = new JLabel("Fail");
+			lblFailDisplay.setHorizontalAlignment(SwingConstants.LEFT);
+			lblFailDisplay.setFont(new Font("UTM Bienvenue", Font.PLAIN, 16));
+			lblFailDisplay.setBounds(590, 328, 143, 23);
+			panel.add(lblFailDisplay);
+			
 			JButton btnImportDataFrom = new JButton("Import data from file");
 			btnImportDataFrom.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -455,10 +453,11 @@ public class detailStudentPanelContent extends JPanel {
 					{
 						File fi = fileChooser.getSelectedFile();
 						try {
-					        List < User > list = new ArrayList < > ();
+					        List < Grade > list = new ArrayList < > ();
 							BufferedReader br = new BufferedReader(new InputStreamReader( new FileInputStream(fi.getPath()), "UTF-8"));
-							String className = br.readLine().trim().replace(",", "").toString(); ;
-							
+							String str[] = br.readLine().trim().replace(",", "").toString().split("-"); ;
+							String className = str[0];
+							String codeSubjectFile = str[1];
 							String columns = br.readLine().trim();
 							System.out.println(columns);
 							Object [] lines = br.lines().toArray();
@@ -466,14 +465,10 @@ public class detailStudentPanelContent extends JPanel {
 							{
 								String line = lines[i].toString().trim();
 								String[] dataRow = line.split(",");
-								list.add(new User(dataRow[1],dataRow[1],dataRow[2],dataRow[4],dataRow[3].toLowerCase() =="nam"?true:false,dataRow[1],className));
+								list.add(new Grade(dataRow[1],dataRow[2],Double.parseDouble(dataRow[3]),Double.parseDouble(dataRow[4]),Double.parseDouble(dataRow[5]),Double.parseDouble(dataRow[6]),codeSubjectFile));
 								
 							}
-							 String INSERT_USERS_SQL = "INSERT INTO users (username,password,name,indentity_number,gender,indentity_student,id_class)\r\n" + 
-							 		"SELECT * FROM (SELECT ? as username ,? as password,?,?,?,? as indentity_number,(SELECT(id_class) as id_class from classes where name_class=?)) as tmp\r\n" + 
-							 		"WHERE NOT EXISTS (\r\n" + 
-							 		"    SELECT username FROM users WHERE username = ?\r\n" + 
-							 		") LIMIT 1;";
+							 String INSERT_USERS_SQL = "INSERT INTO grades (id_user,code_subject,midterm_grade,final_grade,other_grade,average_grade) values((select * from(select id_user from users where indentity_student=? limit 1) as tmp),?,?,?,?,?);";
 							try {
 								Class.forName("com.mysql.jdbc.Driver");
 								Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/hiberate?characterEncoding=UTF-8","root","root");
@@ -487,31 +482,7 @@ public class detailStudentPanelContent extends JPanel {
 								if(rs!=0)
 								{
 									JOptionPane.showMessageDialog(null,"Add new Class: " + className + " sucessfull");
-									 try (Connection connection = DriverManager
-									            .getConnection("jdbc:mysql://localhost:3306/hiberate?characterEncoding=UTF-8", "root", "root");
-									            // Step 2:Create a statement using connection object
-									            PreparedStatement preparedStatement = (PreparedStatement) connection.prepareStatement(INSERT_USERS_SQL)) {
-									            connection.setAutoCommit(false);
-									            for (Iterator < User > iterator = list.iterator(); iterator.hasNext();) {
-									                User user = (User) iterator.next();
-									                preparedStatement.setString(1, user.getUsername());
-									                preparedStatement.setString(2, user.getUsername());
-									                preparedStatement.setString(3, user.getName());
-									                preparedStatement.setString(4, user.getIndentity_number());
-									                preparedStatement.setBoolean(5, user.getGender());
-									                preparedStatement.setString(6, user.getUsername());
-									                preparedStatement.setString(7, user.getname_class());
-									                preparedStatement.setString(8, user.getUsername());
-									                preparedStatement.addBatch();
-									            }
-												System.out.println(preparedStatement);							       
-									            int[] updateCounts = preparedStatement.executeBatch();
-									            System.out.println(Arrays.toString(updateCounts));
-									            connection.commit();
-									            connection.setAutoCommit(true);
-									        } catch (BatchUpdateException batchUpdateException) {
-									        } catch (SQLException e1) {
-									        }
+						
 										comboBoxChooseClass.addItem(className);
 
 								}
@@ -522,7 +493,77 @@ public class detailStudentPanelContent extends JPanel {
 									JOptionPane.showMessageDialog(null,"Can't add new Class: " + className + ". Because it existed");
 								}
 
-								
+								 try (Connection connection = DriverManager
+								            .getConnection("jdbc:mysql://localhost:3306/hiberate?characterEncoding=UTF-8", "root", "root");
+								            // Step 2:Create a statement using connection object
+								            PreparedStatement preparedStatement = (PreparedStatement) connection.prepareStatement(INSERT_USERS_SQL)) {
+								            connection.setAutoCommit(false);
+								            for (Iterator < Grade > iterator = list.iterator(); iterator.hasNext();) {
+								                Grade grade = (Grade) iterator.next();
+								                preparedStatement.setString(1, grade.getIndentity_student());
+								                preparedStatement.setString(2, grade.getCodeSubject());
+								                preparedStatement.setDouble(3, grade.getMidTermGrade());
+								                preparedStatement.setDouble(4, grade.getFinalGrade());
+								                preparedStatement.setDouble(5, grade.getOtherGrade());
+								                preparedStatement.setDouble(6, grade.getTotalGrade());
+								          
+								                preparedStatement.addBatch();
+								            }
+											System.out.println(preparedStatement);							       
+								            int[] updateCounts = preparedStatement.executeBatch();
+								            System.out.println(Arrays.toString(updateCounts));
+								            System.out.println(codeSubjectFile);
+								            className=className.toString().replace("?","");
+								       
+								            connection.commit();
+								            connection.setAutoCommit(true);
+								       
+								            sqlClasses = "select * from classes;";
+
+											System.out.println(sqlClasses);
+											ResultSet rs1 = stmt.executeQuery(sqlClasses);
+											List<String> list3 = new ArrayList<>();
+											List<String> list2 = new ArrayList<>();
+
+											if(rs1.next())
+											{
+												
+												
+												String item = new String(rs1.getString("name_class"));
+												comboBoxChooseClass.addItem(item);
+												classChoosen= item;
+												list3.add(rs1.getString("name_class"));
+												sqlSubjects = "select s.* from subjects as s, classes as c where s.id_class=c.id_class and c.id_class=" + rs1.getString("id_class");
+												while(rs1.next()){
+												
+													comboBoxChooseClass.addItem(rs1.getString("name_class"));
+													list3.add(rs1.getString("name_class"));
+													}
+											
+											}
+											ResultSet rs2= stmt.executeQuery(sqlSubjects);
+											if(rs2.next())
+											{
+												 ComboBoxModel model = comboBoxSubject.getModel();
+									                DefaultComboBoxModel<String> dfModel = new DefaultComboBoxModel<String>();
+												String item = new String(rs2.getString("code_subject"));
+												codeSubjectChoosen = item;
+												comboBoxSubject.setModel(model);
+												comboBoxSubject.addItem(item);
+												list2.add(rs2.getString("code_subject"));
+												while(rs2.next()){
+												
+													comboBoxSubject.addItem(rs2.getString("code_subject"));
+													list2.add(rs2.getString("code_subject"));
+													}
+											}
+										     classChoosen= className;
+									            codeSubjectChoosen = codeSubjectFile;
+									            comboBoxChooseClass.setSelectedItem(className);
+									            comboBoxSubject.setSelectedItem(codeSubjectFile);
+								        } catch (BatchUpdateException batchUpdateException) {
+								        } catch (SQLException e1) {
+								        }
 								
 							} catch (Exception e2) {
 								System.out.println(e2.getMessage());
@@ -602,9 +643,11 @@ public class detailStudentPanelContent extends JPanel {
 				ResultSet rs2= stmt.executeQuery(sqlSubjects);
 				if(rs2.next())
 				{
-					
+					 ComboBoxModel model = comboBoxSubject.getModel();
+		                DefaultComboBoxModel<String> dfModel = new DefaultComboBoxModel<String>();
 					String item = new String(rs2.getString("code_subject"));
 					codeSubjectChoosen = item;
+					comboBoxSubject.setModel(model);
 					comboBoxSubject.addItem(item);
 					list2.add(rs2.getString("code_subject"));
 					while(rs2.next()){
@@ -635,6 +678,8 @@ public class detailStudentPanelContent extends JPanel {
 				if(resultStudent.next())
 				{
 					int index =1;
+					float passed=0;
+					float failure=0;
 					 DefaultTableModel model = new DefaultTableModel();
 					model.addColumn("STT");
 					model.addColumn("MSSV");
@@ -644,6 +689,11 @@ public class detailStudentPanelContent extends JPanel {
 					model.addColumn("Other");
 					model.addColumn("Total");
 					model.addColumn("Status");
+					float avg= resultStudent.getFloat("average_grade");
+					if (avg>5)
+						passed++;
+					else
+						failure++;
 					model.addRow(new Object[] {
 							index++,
 							resultStudent.getString("indentity_student"),
@@ -652,7 +702,8 @@ public class detailStudentPanelContent extends JPanel {
 							resultStudent.getString("final_grade"),
 							resultStudent.getString("other_grade"),
 							resultStudent.getString("average_grade"),
-							resultStudent.getInt("average_grade")>=5? "Pass" : "Fail",
+							resultStudent.getFloat("average_grade")>=5? "Pass" : "Fail",
+									
 							
 						});
 					while(resultStudent.next())
@@ -668,11 +719,28 @@ public class detailStudentPanelContent extends JPanel {
 								resultStudent.getInt("average_grade")>=5? "Pass" : "Fail",
 							
 						});
+						avg= resultStudent.getFloat("average_grade");
+						if (avg>5)
+							passed++;
+						else
+							failure++;
 					}
 					System.out.println(model.getColumnCount());
+					index--;
+					String ratioPass = Float.toString((passed/index)*100);
+					String ratioFail = Float.toString((failure/index)*100);
+					int passedInt =(int)passed;
+					int failureInt = (int) failure;
+					System.out.println(passed);
+					System.out.println(failure);
+					System.out.println(index);
+
+					this.lblPassDisplay.setText(ratioPass + "% (" + Integer.toString(passedInt)+ ")");
+					this.lblFailDisplay.setText(ratioFail + "% (" + Integer.toString(failureInt)+ ")");
+
 					tableList.setModel(model);
 					tableList.getColumnModel().getColumn(2).setPreferredWidth(160);
-
+					
 
 					
 				}
@@ -681,7 +749,7 @@ public class detailStudentPanelContent extends JPanel {
 			
 			else
 			{
-				JOptionPane.showMessageDialog(null,"Get Data Fail");
+				JOptionPane.showMessageDialog(null,"This Subject in this class don't have any score");
 
 			}
 			}
@@ -696,7 +764,7 @@ public class detailStudentPanelContent extends JPanel {
 			System.out.println(otherGrade);
 			float avg = (midTermGrade + finalGrade + otherGrade)/3;
 			System.out.println(avg);
-			lblTotalDisplay.setText(df.format(avg));
+//			lblTotalDisplay.setText(df.format(avg));
 			totalGrade = avg;
 		}
 }
